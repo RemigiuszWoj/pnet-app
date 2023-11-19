@@ -73,7 +73,7 @@ jobs:
           pip install flake8 pytest
           if [ -f rnet-app/requirements.txt ]; then pip install -r net-app/requirements.txt; fi
 
-  lint:
+  flake8:
     runs-on: ubuntu-latest
     needs: build
     if: success()
@@ -98,6 +98,54 @@ jobs:
         run: |
           flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
           flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+
+  black:
+    runs-on: ubuntu-latest
+    needs: build
+    if: success()
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+      - name: Set up Python 3.10
+        uses: actions/setup-python@v3
+        with:
+          python-version: "3.10"
+      - name: Restore cached dependencies
+        uses: actions/cache@v2
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('rnet-app/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+      - name: Install black
+        run: pip install black
+      - name: Test with black
+        run: black
+
+  isort:
+    runs-on: ubuntu-latest
+    needs: build
+    if: success()
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+      - name: Set up Python 3.10
+        uses: actions/setup-python@v3
+        with:
+          python-version: "3.10"
+      - name: Restore cached dependencies
+        uses: actions/cache@v2
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('rnet-app/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+      - name: Install isort
+        run: pip install isort
+      - name: Test with isort
+        run: isort
 
   test:
     runs-on: ubuntu-latest
